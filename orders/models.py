@@ -1,14 +1,14 @@
 from django.db import models
 from schools.models import Schools, Classes
 from account.models import User
-from products.models import Products
 from helper import helper
 
 
 # Orders Model
 class Orders(models.Model):
     id = models.UUIDField(
-        primary_key=True, default=helper.getUniqueId(), editable=False)
+        primary_key=True, default=helper.getUniqueId(), editable=False
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     school = models.ForeignKey(Schools, on_delete=models.CASCADE)
     student_class = models.ForeignKey(Classes, on_delete=models.CASCADE)
@@ -19,9 +19,8 @@ class Orders(models.Model):
     class Meta:
         db_table = "orders"
 
+
 # order Products
-
-
 class OrderProducts(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

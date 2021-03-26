@@ -148,7 +148,7 @@ class ReadClasses(ListAPIView):
 # Update Class
 # PUT
 # PARAMS - name
-# /api/school//class/update/<str:id>
+# /api/school/class/update/<str:id>
 class UpdateClass(UpdateAPIView):
     permission_classes = [helper.permission.IsAdmin]
 
