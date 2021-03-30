@@ -13,7 +13,9 @@ pycparser==2.20
 PyJWT==1.7.1
 python-dotenv==0.15.0
 pytz==2020.4
+razorpay==1.2.0
 requests==2.25.0
 six==1.15.0
 sqlparse==0.4.1
+twilio==6.54.0
 urllib3==1.26.2
