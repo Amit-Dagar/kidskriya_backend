@@ -2,17 +2,18 @@ from django.db import models
 from schools.models import Schools, Classes
 from account.models import User
 from helper import helper
-
+import uuid
 
 # Orders Model
 class Orders(models.Model):
     id = models.UUIDField(
-        primary_key=True, default=helper.getUniqueId(), editable=False
+        primary_key=True, default=uuid.uuid1(), editable=False
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     school = models.ForeignKey(Schools, on_delete=models.CASCADE)
     student_class = models.ForeignKey(Classes, on_delete=models.CASCADE)
     price = models.FloatField()
+    payment_id = models.CharField(max_length=40, null=True, blank=True)
     status = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
 
