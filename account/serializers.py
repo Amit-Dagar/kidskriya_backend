@@ -32,7 +32,8 @@ class UserLoginSerializer(Serializer):
         if user and user.is_verified:
             return user
         elif user and not user.is_verified:
-            user.otp = helper.generateOTP(6)
+            # user.otp = helper.generateOTP(6)
+            user.otp = 123456
             user.save()
             # OTP to Mobile goes here...
             # raise helper.exception.PhoneNotVerified(
@@ -49,7 +50,8 @@ class UserSignupSerializer(ModelSerializer):
 
     def create(self, data):
         user = User.objects.create_user(**data)
-        user.otp = helper.generateOTP(6)
+        # user.otp = helper.generateOTP(6)
+        user.otp = 123456
         user.save()
         # Mobile OTP goes here
 

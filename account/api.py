@@ -121,7 +121,8 @@ class ForgotPassword(CreateAPIView):
             raise helper.exception.NotFound(
                 helper.message.MODULE_NOT_FOUND('user'))
 
-        user.otp = helper.generateOTP(6)
+        # user.otp = helper.generateOTP(6)
+        user.otp = 123456
         user.save()
         message = "You OTP (" + str(user.otp) + \
             ") for verification at KidsKriya. Thank you choosing us"
