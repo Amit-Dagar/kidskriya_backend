@@ -10,7 +10,7 @@ from helper import helper
 
 
 class AdminLoginSerializer(Serializer):
-    phone = CharField()
+    email = CharField()
     password = CharField()
 
     def validate(self, data):
@@ -21,7 +21,7 @@ class AdminLoginSerializer(Serializer):
 
 
 class UserLoginSerializer(Serializer):
-    phone = CharField()
+    email = CharField()
     password = CharField()
 
     def validate(self, data):
@@ -45,7 +45,7 @@ class UserLoginSerializer(Serializer):
 class UserSignupSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'phone', 'name', 'password')
+        fields = ('id', 'email', 'name', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, data):

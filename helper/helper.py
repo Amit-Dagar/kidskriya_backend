@@ -107,3 +107,12 @@ def modifyPhoneNumber(phone):
         raise exception.ParseError(message.INVALID_INPUT("Phone Number"))
 
     return phone
+
+
+def modifyEmailAddress(email):
+    if any(letter.isupper() for letter in email):
+        return email.lower()
+
+    else :
+        return email
+    

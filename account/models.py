@@ -2,15 +2,15 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import RegexValidator
 from schools.models import Schools
-from helper.helper import modifyPhoneNumber
+from helper.helper import modifyEmailAddress
 import uuid
 
 
 class MyAccountManager(BaseUserManager):
-    def create_user(self, phone, name, password=None):
-        phone = modifyPhoneNumber(phone)
+    def create_user(self, name, email, password=None):
+        email = modifyEmailAddress(email)
         user = self.model(
-            phone=phone,
+            email=email,
             name=name
         )
         user.set_password(password)
@@ -21,9 +21,9 @@ class MyAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone, password, name):
+    def create_superuser(self, email, password, name):
         user = self.create_user(
-            phone=phone,
+            email=email,
             name=name,
             password=password
         )
@@ -39,7 +39,7 @@ class MyAccountManager(BaseUserManager):
 class User(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50, blank=True, null=True)
-    phone = models.CharField(max_length=13, unique=True)
+    # phone = models.CharField(max_length=13, unique=True)
     email = models.EmailField(
         verbose_name="email", max_length=100, unique=True, blank=True, null=True)
     date_joined = models.DateTimeField(
@@ -52,7 +52,7 @@ class User(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     otp = models.IntegerField(blank=True, null=True)
 
-    USERNAME_FIELD = 'phone'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
 
     objects = MyAccountManager()

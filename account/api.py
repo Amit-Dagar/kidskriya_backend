@@ -18,10 +18,10 @@ class AdminLogin(GenericAPIView):
     serializer_class = AdminLoginSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['phone', 'password'])
+        helper.check_parameters(request.data, ['email', 'password'])
 
         data = {
-            "phone": helper.modifyPhoneNumber(request.data['phone']),
+            "email": helper.modifyEmailAddress(request.data['email']),
             "password": request.data['password']
         }
 
@@ -44,10 +44,10 @@ class UserLogin(GenericAPIView):
     serializer_class = UserLoginSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['phone', 'password'])
+        helper.check_parameters(request.data, ['email', 'password'])
 
         data = {
-            "phone": helper.modifyPhoneNumber(request.data['phone']),
+            "email": helper.modifyEmailAddress(request.data['email']),
             "password": request.data['password']
         }
 
@@ -69,13 +69,13 @@ class UserSignup(CreateAPIView):
     serializer_class = UserSignupSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['name', 'phone', 'password'])
+        helper.check_parameters(request.data, ['email', 'name', 'password'])
 
-        phone = helper.modifyPhoneNumber(request.data['phone'])
+        email = helper.modifyEmailAddress(request.data['email'])
 
-        if User.objects.filter(phone=phone).count() > 0:
+        if User.objects.filter(email=email).count() > 0:
             raise helper.exception.NotAcceptable(
-                helper.message.USER_PHONE_EXISTS)
+                helper.message.USER_EMAIL_EXISTS)
 
         user = self.get_serializer(data=request.data)
         user.is_valid(raise_exception=True)
@@ -87,8 +87,8 @@ class UserSignup(CreateAPIView):
 # User Confirm OTP API
 class ConfirmOTP(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['phone', 'otp'])
-        phone = helper.modifyPhoneNumber(request.data['phone'])
+        helper.check_parameters(request.data, ['email', 'otp'])
+        emaik = helper.modifyEmailAddress(request.data['email'])
         try:
             user = User.objects.get(
                 phone=phone, otp=request.data['otp'])
@@ -111,12 +111,12 @@ class ConfirmOTP(CreateAPIView):
 # Forgot Password API
 class ForgotPassword(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['phone'])
+        helper.check_parameters(request.data, ['email'])
 
-        phone = helper.modifyPhoneNumber(request.data['phone'])
+        email = helper.modifyEmailAddress(request.data['email'])
 
         try:
-            user = User.objects.get(phone=phone)
+            user = User.objects.get(email=email)
         except Exception as e:
             raise helper.exception.NotFound(
                 helper.message.MODULE_NOT_FOUND('user'))
@@ -134,11 +134,11 @@ class ForgotPassword(CreateAPIView):
 # Reset Password API
 class ResetPassword(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['otp', 'phone', 'new_password'])
+        helper.check_parameters(request.data, ['otp', 'email', 'new_password'])
 
-        phone = helper.modifyPhoneNumber(request.data['phone'])
+        email = helper.modifyEmailAddress(request.data['email'])
         try:
-            user = User.objects.get(phone=phone, otp=request.data['otp'])
+            user = User.objects.get(email=email, otp=request.data['otp'])
         except Exception as e:
             raise helper.exception.NotFound(helper.message.VERIFY_OTP_MISMATCH)
 
