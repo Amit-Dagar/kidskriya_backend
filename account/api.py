@@ -160,7 +160,7 @@ class UpdatePassword(CreateAPIView):
 
         user = authenticate(
             **{
-                "username": request.user.username,
+                "email": request.user.email,
                 "password": request.data["old_password"],
             }
         )
