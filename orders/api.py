@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -89,4 +90,19 @@ class OrderPurchase(CreateAPIView):
             {
                 "order_id": order.payment_id
             }
+        )
+
+# Read All Orders
+# GET
+# PARAMS -
+# /api/order/read
+class ReadOrder(ListAPIView):
+    http_method_names = ["get"]
+    
+    def list(self, request):
+        queryset = Orders.objects.all()
+
+        return helper.createResponse(
+            helper.message.MODULE_LIST("Order"),
+            OrderSerializer(queryset, many=True).data
         )
