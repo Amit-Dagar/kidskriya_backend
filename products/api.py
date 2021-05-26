@@ -59,9 +59,46 @@ class ReadProduct(ListAPIView):
         paginator.page_size = helper.settings.PAGE_SIZE
 
         if "search" in request.GET:
-            queryset = Products.objects.filter(name__icontains=request.GET["search"])
+            if "school" in request.GET:
+                if "class" in request.GET:
+                    queryset = Products.objects.filter(
+                        name__icontains=request.GET["search"],
+                        school=request.GET["school"],
+                        cls=request.GET["class"],
+                    )
+                else:
+                    queryset = Products.objects.filter(
+                        name__icontains=request.GET["search"],
+                        school=request.GET["school"],
+                    )
+            else:
+                if "class" in request.GET:
+                    queryset = Products.objects.filter(
+                        name__icontains=request.GET["search"],
+                        cls=request.GET["class"],
+                    )
+                else:
+                    queryset = Products.objects.filter(
+                        name__icontains=request.GET["search"]
+                    )
         else:
-            queryset = Products.objects.all()
+            if "school" in request.GET:
+                if "class" in request.GET:
+                    queryset = Products.objects.filter(
+                        school=request.GET["school"],
+                        cls=request.GET["class"],
+                    )
+                else:
+                    queryset = Products.objects.filter(
+                        school=request.GET["school"],
+                    )
+            else:
+                if "class" in request.GET:
+                    queryset = Products.objects.filter(
+                        cls=request.GET["class"],
+                    )
+                else:
+                    queryset = Products.objects.filter()
 
         page_context = paginator.paginate_queryset(queryset, request)
 
