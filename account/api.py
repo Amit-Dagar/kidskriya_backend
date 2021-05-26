@@ -1,7 +1,8 @@
 from rest_framework.generics import (
     GenericAPIView,
     CreateAPIView,
-    ListAPIView
+    ListAPIView,
+    DestroyAPIView
 )
 from .serializers import (
     AdminLoginSerializer,
@@ -186,4 +187,24 @@ class ReadUser(ListAPIView):
         return helper.createResponse(
             "list",
             UserSerializer(queryset, many=True).data
+        )
+
+# Delete User
+# Params -
+# /api/auth/delete/<str:id>
+class DeleteUser(DestroyAPIView):
+    permission_classes = [helper.permission.IsAdmin]
+
+    def delete(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+        except Exception as e:
+            raise helper.exception.NotAcceptable(
+                helper.message.MODULE_NOT_FOUND("User")
+            )
+
+        user.delete()
+
+        return helper.createResponse(
+            helper.message.MODULE_STATUS_CHANGE("User", "deleted")
         )
