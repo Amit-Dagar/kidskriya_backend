@@ -3,8 +3,9 @@ from rest_framework.generics import (
     ListAPIView,
     UpdateAPIView,
     DestroyAPIView,
+    GenericAPIView,
 )
-from .serializers import SchoolSerializer, ClassSerializer
+from .serializers import SchoolSerializer, ClassSerializer, authenticate
 from .models import Schools, Classes
 from helper import helper
 
@@ -21,7 +22,7 @@ class CreateSchool(CreateAPIView):
 
     def post(self, request):
         helper.check_parameters(
-            request.data, ["name", "city", "state", "pin", "address", "phone", "email"]
+            request.data, ["name", "city", "state", "pin", "address", "phone", "email", "password"]
         )
 
         serializer = self.get_serializer(data=request.data)
