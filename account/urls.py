@@ -6,7 +6,8 @@ from .api import (
     ConfirmOTP,
     ForgotPassword,
     ResetPassword,
-    UpdatePassword
+    UpdatePassword,
+    ReadUser
 )
 
 
@@ -18,4 +19,5 @@ urlpatterns = [
     path('forgotPassword', ForgotPassword.as_view()),
     path('resetPassword', ResetPassword.as_view()),
     path('updatePassword', UpdatePassword.as_view()),
+    path('readUsers', ReadUser.as_view()),
 ]

@@ -56,3 +56,11 @@ class UserSignupSerializer(ModelSerializer):
         # Mobile OTP goes here
 
         return user
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ["password", "otp", "is_staff"]
+
+    

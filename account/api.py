@@ -1,12 +1,14 @@
 from rest_framework.generics import (
     GenericAPIView,
-    CreateAPIView
+    CreateAPIView,
+    ListAPIView
 )
 from .serializers import (
     AdminLoginSerializer,
     UserLoginSerializer,
     UserSignupSerializer,
-    authenticate
+    authenticate,
+    UserSerializer
 )
 from .models import User
 from helper import helper
@@ -88,7 +90,7 @@ class UserSignup(CreateAPIView):
 class ConfirmOTP(CreateAPIView):
     def post(self, request):
         helper.check_parameters(request.data, ['email', 'otp'])
-        emaik = helper.modifyEmailAddress(request.data['email'])
+        email = helper.modifyEmailAddress(request.data['email'])
         try:
             user = User.objects.get(
                 phone=phone, otp=request.data['otp'])
@@ -171,3 +173,17 @@ class UpdatePassword(CreateAPIView):
             return helper.createResponse(helper.message.CHANGE_PASSWORD_SUCCESS)
         else:
             return helper.createResponse(helper.message.PASSWORD_MISMATCH)
+
+# Read All Users
+class ReadUser(ListAPIView):
+    http_method_names = ["get"]
+    # permission_classes = [helper.permission.IsAuthenticated]
+
+    
+    def list(self, request):
+        queryset = User.objects.all()
+
+        return helper.createResponse(
+            "list",
+            UserSerializer(queryset, many=True).data
+        )
