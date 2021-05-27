@@ -2,14 +2,14 @@ from rest_framework.generics import (
     GenericAPIView,
     CreateAPIView,
     ListAPIView,
-    DestroyAPIView
+    DestroyAPIView,
 )
 from .serializers import (
     AdminLoginSerializer,
     UserLoginSerializer,
     UserSignupSerializer,
     authenticate,
-    UserSerializer
+    UserSerializer,
 )
 from .models import User
 from helper import helper
@@ -21,11 +21,11 @@ class AdminLogin(GenericAPIView):
     serializer_class = AdminLoginSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['email', 'password'])
+        helper.check_parameters(request.data, ["email", "password"])
 
         data = {
-            "email": helper.modifyEmailAddress(request.data['email']),
-            "password": request.data['password']
+            "email": helper.modifyEmailAddress(request.data["email"]),
+            "password": request.data["password"],
         }
 
         user = self.get_serializer(data=data)
@@ -34,11 +34,7 @@ class AdminLogin(GenericAPIView):
 
         return helper.createResponse(
             helper.message.LOGIN_SUCCESS,
-            {
-                "user": user.name,
-                "email": user.email,
-                "token": helper.get_token(user)
-            }
+            {"user": user.name, "email": user.email, "token": helper.get_token(user)},
         )
 
 
@@ -47,11 +43,11 @@ class UserLogin(GenericAPIView):
     serializer_class = UserLoginSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['email', 'password'])
+        helper.check_parameters(request.data, ["email", "password"])
 
         data = {
-            "email": helper.modifyEmailAddress(request.data['email']),
-            "password": request.data['password']
+            "email": helper.modifyEmailAddress(request.data["email"]),
+            "password": request.data["password"],
         }
 
         user = self.get_serializer(data=data)
@@ -60,10 +56,7 @@ class UserLogin(GenericAPIView):
 
         return helper.createResponse(
             helper.message.LOGIN_SUCCESS,
-            {
-                "user": user.name,
-                "token": helper.get_token(user)
-            }
+            {"user": user.name, "token": helper.get_token(user)},
         )
 
 
@@ -72,13 +65,12 @@ class UserSignup(CreateAPIView):
     serializer_class = UserSignupSerializer
 
     def post(self, request):
-        helper.check_parameters(request.data, ['email', 'name', 'password'])
+        helper.check_parameters(request.data, ["email", "name", "password"])
 
-        email = helper.modifyEmailAddress(request.data['email'])
+        email = helper.modifyEmailAddress(request.data["email"])
 
         if User.objects.filter(email=email).count() > 0:
-            raise helper.exception.NotAcceptable(
-                helper.message.USER_EMAIL_EXISTS)
+            raise helper.exception.NotAcceptable(helper.message.USER_EMAIL_EXISTS)
 
         user = self.get_serializer(data=request.data)
         user.is_valid(raise_exception=True)
@@ -90,11 +82,10 @@ class UserSignup(CreateAPIView):
 # User Confirm OTP API
 class ConfirmOTP(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['email', 'otp'])
-        email = helper.modifyEmailAddress(request.data['email'])
+        helper.check_parameters(request.data, ["email", "otp"])
+        email = helper.modifyEmailAddress(request.data["email"])
         try:
-            user = User.objects.get(
-                phone=phone, otp=request.data['otp'])
+            user = User.objects.get(phone=phone, otp=request.data["otp"])
         except Exception:
             raise helper.exception.NotFound(helper.message.VERIFY_OTP_MISMATCH)
 
@@ -104,31 +95,30 @@ class ConfirmOTP(CreateAPIView):
 
         return helper.createResponse(
             helper.message.VERIFY_PHONE_SUCCESS,
-            {
-                "user": user.name,
-                "token": helper.get_token(user)
-            }
+            {"user": user.name, "token": helper.get_token(user)},
         )
 
 
 # Forgot Password API
 class ForgotPassword(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['email'])
+        helper.check_parameters(request.data, ["email"])
 
-        email = helper.modifyEmailAddress(request.data['email'])
+        email = helper.modifyEmailAddress(request.data["email"])
 
         try:
             user = User.objects.get(email=email)
         except Exception as e:
-            raise helper.exception.NotFound(
-                helper.message.MODULE_NOT_FOUND('user'))
+            raise helper.exception.NotFound(helper.message.MODULE_NOT_FOUND("user"))
 
         # user.otp = helper.generateOTP(6)
         user.otp = 123456
         user.save()
-        message = "You OTP (" + str(user.otp) + \
-            ") for verification at KidsKriya. Thank you choosing us"
+        message = (
+            "You OTP ("
+            + str(user.otp)
+            + ") for verification at KidsKriya. Thank you choosing us"
+        )
         helper.sms.sendSMS(user.phone, message)
 
         return helper.createResponse(helper.message.FORGOT_PASSWORD_SUCCESS)
@@ -137,16 +127,16 @@ class ForgotPassword(CreateAPIView):
 # Reset Password API
 class ResetPassword(CreateAPIView):
     def post(self, request):
-        helper.check_parameters(request.data, ['otp', 'email', 'new_password'])
+        helper.check_parameters(request.data, ["otp", "email", "new_password"])
 
-        email = helper.modifyEmailAddress(request.data['email'])
+        email = helper.modifyEmailAddress(request.data["email"])
         try:
-            user = User.objects.get(email=email, otp=request.data['otp'])
+            user = User.objects.get(email=email, otp=request.data["otp"])
         except Exception as e:
             raise helper.exception.NotFound(helper.message.VERIFY_OTP_MISMATCH)
 
         user.otp = None
-        user.set_password(request.data['new_password'])
+        user.set_password(request.data["new_password"])
         user.save()
 
         return helper.createResponse(helper.message.RESET_PASSWORD_SUCCESS)
@@ -175,19 +165,17 @@ class UpdatePassword(CreateAPIView):
         else:
             return helper.createResponse(helper.message.PASSWORD_MISMATCH)
 
+
 # Read All Users
 class ReadUser(ListAPIView):
     http_method_names = ["get"]
     # permission_classes = [helper.permission.IsAuthenticated]
 
-    
     def list(self, request):
-        queryset = User.objects.all()
+        queryset = User.objects.filter(is_superuser=False)
 
-        return helper.createResponse(
-            "list",
-            UserSerializer(queryset, many=True).data
-        )
+        return helper.createResponse("list", UserSerializer(queryset, many=True).data)
+
 
 # Delete User
 # Params -
@@ -203,7 +191,8 @@ class DeleteUser(DestroyAPIView):
                 helper.message.MODULE_NOT_FOUND("User")
             )
 
-        user.delete()
+        user.is_active = False
+        user.save()
 
         return helper.createResponse(
             helper.message.MODULE_STATUS_CHANGE("User", "deleted")
