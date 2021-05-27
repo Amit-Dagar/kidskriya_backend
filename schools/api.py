@@ -22,7 +22,7 @@ class CreateSchool(CreateAPIView):
 
     def post(self, request):
         helper.check_parameters(
-            request.data, ["name", "city", "state", "pin", "address", "phone", "email", "password"]
+            request.data, ["name", "city", "state", "pin", "address", "phone", "email"]
         )
 
         serializer = self.get_serializer(data=request.data)

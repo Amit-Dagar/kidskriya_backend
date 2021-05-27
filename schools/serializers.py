@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, CharField, SerializerMethodField, Serializer
+from rest_framework.serializers import ModelSerializer
 from .models import Schools, Classes
 from django.contrib.auth import authenticate
 
