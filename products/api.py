@@ -102,8 +102,9 @@ class ReadProduct(ListAPIView):
 
         page_context = paginator.paginate_queryset(queryset, request)
 
-        return paginator.get_paginated_response(
-            ProductSerializer(page_context, many=True).data
+        return helper.createResponse(
+            "",
+            ProductSerializer(queryset, many=True).data
         )
 
 
