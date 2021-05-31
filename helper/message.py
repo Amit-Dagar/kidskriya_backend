@@ -152,7 +152,7 @@ PARAM_MISSING = "Request parameter missing."
 
 INVALID_EMAIL = "The selected email is invalid."
 SIGNUP_USER_ERR = "Error during signup."
-SIGNUP_USER_SUCCESS = "You have signed up successfully. Please verify your mobile number by entering the otp sent to your phone"
+SIGNUP_USER_SUCCESS = "You have signed up successfully"
 
 USER_DESTROY_ENABLED = "User status has been enabled successfully."
 USER_DESTROY_DISABLED = "User status has been disabled successfully."

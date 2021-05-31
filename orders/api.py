@@ -1,4 +1,4 @@
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet, RawQuerySet
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -21,7 +21,9 @@ class OrderPurchase(CreateAPIView):
     permission_classes = [helper.permission.IsAuthenticated]
 
     def post(self, request):
-        helper.check_parameters(request.data, ["products", "school", "class"])
+        helper.check_parameters(
+            request.data, ["products", "school", "class", "address", "additional"]
+        )
         price = 0
 
         # checking all products are valid or not
@@ -40,16 +42,24 @@ class OrderPurchase(CreateAPIView):
                 raise helper.exception.ParseError(helper.message.UNKNOWN_ERR)
 
         # checking school
-        try:
-            school = Schools.objects.get(id=request.data["school"])
-        except Exception:
-            raise helper.exception.NotFound(helper.message.MODULE_NOT_FOUND("School"))
+        school = request.data["school"]
+        stu_class = request.data["class"]
+        if request.data["school"]:
+            try:
+                school = Schools.objects.get(id=request.data["school"])
+            except Exception:
+                raise helper.exception.NotFound(
+                    helper.message.MODULE_NOT_FOUND("School")
+                )
 
         # checking student_class
-        try:
-            stu_class = Classes.objects.get(id=request.data["class"])
-        except Exception:
-            raise helper.exception.NotFound(helper.message.MODULE_NOT_FOUND("Class"))
+        if request.data["class"]:
+            try:
+                stu_class = Classes.objects.get(id=request.data["class"])
+            except Exception:
+                raise helper.exception.NotFound(
+                    helper.message.MODULE_NOT_FOUND("Class")
+                )
 
         # create order
         order = Orders.objects.create(
@@ -58,17 +68,9 @@ class OrderPurchase(CreateAPIView):
             student_class=stu_class,
             price=price,
             status=1,
+            address=request.data["address"],
+            additional=request.data["additional"],
         )
-        order.save()
-
-        data = {
-            "amount": int(price * 100),
-            "currency": "INR",
-            "receipt": str(order.id),
-            # "notes": {"order_id": str(order.id), "username": request.user.name},
-        }
-        response = helper.payment.razorpay(data)
-        order.payment_id=response['id']
         order.save()
 
         # preparing orders data
@@ -86,11 +88,10 @@ class OrderPurchase(CreateAPIView):
             orderProduct.save()
 
         return helper.createResponse(
-            helper.message.MODULE_STATUS_CHANGE("Order", "created"),
-            {
-                "order_id": order.payment_id
-            }
+            helper.message.MODULE_STATUS_CHANGE("Order", "placed"),
+            {"order_id": order.id},
         )
+
 
 # Read All Orders
 # GET
@@ -98,11 +99,11 @@ class OrderPurchase(CreateAPIView):
 # /api/order/read
 class ReadOrder(ListAPIView):
     http_method_names = ["get"]
-    
+
     def list(self, request):
         queryset = Orders.objects.all()
 
         return helper.createResponse(
             helper.message.MODULE_LIST("Order"),
-            OrderSerializer(queryset, many=True).data
+            OrderSerializer(queryset, many=True).data,
         )

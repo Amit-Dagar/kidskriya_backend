@@ -2,7 +2,7 @@ from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
     Serializer,
-    CharField
+    CharField,
 )
 from django.contrib.auth import authenticate
 from .models import User
@@ -45,12 +45,13 @@ class UserLoginSerializer(Serializer):
 class UserSignupSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ("id", "email", "name", "password")
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, data):
         user = User.objects.create_user(**data)
         # user.otp = helper.generateOTP(6)
+        self.context["request"].data["id"] = user.id
         user.otp = 123456
         user.save()
         # Mobile OTP goes here
@@ -62,5 +63,3 @@ class UserSerializer(ModelSerializer):
     class Meta:
         model = User
         exclude = ["password", "otp", "is_staff"]
-
-    

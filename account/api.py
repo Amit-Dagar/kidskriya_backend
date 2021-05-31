@@ -46,7 +46,7 @@ class UserLogin(GenericAPIView):
         helper.check_parameters(request.data, ["email", "password"])
 
         data = {
-            "email": helper.modifyEmailAddress(request.data["email"]),
+            "email": request.data["email"],
             "password": request.data["password"],
         }
 
@@ -67,16 +67,18 @@ class UserSignup(CreateAPIView):
     def post(self, request):
         helper.check_parameters(request.data, ["email", "name", "password"])
 
-        email = helper.modifyEmailAddress(request.data["email"])
-
-        if User.objects.filter(email=email).count() > 0:
+        if User.objects.filter(email=request.data["email"]).count() > 0:
             raise helper.exception.NotAcceptable(helper.message.USER_EMAIL_EXISTS)
 
         user = self.get_serializer(data=request.data)
         user.is_valid(raise_exception=True)
         user.save()
+        user = User.objects.get(id=request.data["id"])
 
-        return helper.createResponse(helper.message.SIGNUP_USER_SUCCESS)
+        return helper.createResponse(
+            helper.message.SIGNUP_USER_SUCCESS,
+            {"user": user.name, "token": helper.get_token(user)},
+        )
 
 
 # User Confirm OTP API
