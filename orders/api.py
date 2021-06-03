@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from products.models import Products
 from schools.models import Schools, Classes
 from .models import Orders, OrderProducts
-from .serializers import OrderSerializer, OrderProductSerializer
+from .serializers import OrderSerializer, OrderProductSerializer, ReadOrderSerializer
 
 
 # CHECKOUT API
@@ -44,22 +44,29 @@ class OrderPurchase(CreateAPIView):
         # checking school
         school = request.data["school"]
         stu_class = request.data["class"]
-        if request.data["school"]:
+
+        print(stu_class)
+
+        if school:
             try:
-                school = Schools.objects.get(id=request.data["school"])
+                school = Schools.objects.get(id=school)
             except Exception:
                 raise helper.exception.NotFound(
                     helper.message.MODULE_NOT_FOUND("School")
                 )
+        else:
+            school = None
 
         # checking student_class
-        if request.data["class"]:
+        if stu_class:
             try:
-                stu_class = Classes.objects.get(id=request.data["class"])
+                stu_class = Classes.objects.get(id=stu_class)
             except Exception:
                 raise helper.exception.NotFound(
                     helper.message.MODULE_NOT_FOUND("Class")
                 )
+        else:
+            stu_class = None
 
         # create order
         order = Orders.objects.create(
@@ -97,13 +104,22 @@ class OrderPurchase(CreateAPIView):
 # GET
 # PARAMS -
 # /api/order/read
-class ReadOrder(ListAPIView):
+# class ReadOrder(ListAPIView):
+#     # permission_classes = [helper.permission.IsAuthenticated]
+#     http_method_names = ["get"]
+
+
+class ReadOrders(ListAPIView):
     http_method_names = ["get"]
 
     def list(self, request):
-        queryset = Orders.objects.all()
+        user = request.user
+        if user.is_superuser:
+            queryset = Orders.objects.all()
+        else:
+            queryset = Orders.objects.filter(user=user)
 
         return helper.createResponse(
             helper.message.MODULE_LIST("Order"),
-            OrderSerializer(queryset, many=True).data,
+            ReadOrderSerializer(queryset, many=True).data,
         )

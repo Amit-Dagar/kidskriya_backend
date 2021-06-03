@@ -199,3 +199,20 @@ class DeleteUser(DestroyAPIView):
         return helper.createResponse(
             helper.message.MODULE_STATUS_CHANGE("User", "deleted")
         )
+
+
+# Check User Type
+# GEt
+# /api/auth/checkAccess
+class CheckAccess(ListAPIView):
+    permission_classes = [helper.permission.IsAuthenticated]
+
+    def list(self, request):
+        user = request.user
+        type = "user"
+        if user.is_superuser:
+            type = "admin"
+        elif user.is_school:
+            type = "school"
+
+        return helper.createResponse("Success", {"type": type})

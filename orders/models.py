@@ -6,7 +6,7 @@ import uuid
 
 # Orders Model
 class Orders(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid1(), editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid1, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     school = models.ForeignKey(Schools, on_delete=models.CASCADE, null=True, blank=True)
     student_class = models.ForeignKey(
@@ -20,6 +20,9 @@ class Orders(models.Model):
     address = models.TextField(null=True, blank=True)
     additional = models.TextField(null=True, blank=True)
     status = models.IntegerField()
+    # 1 -> In Progress
+    # 2 -> Out For Delivery
+    # 3 -> Delivered
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
