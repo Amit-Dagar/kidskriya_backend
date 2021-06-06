@@ -153,7 +153,7 @@ class OrderPurchase(CreateAPIView):
 # GET
 # /api/order/read
 class ReadOrders(ListAPIView):
-    permission_classes = [helper.permission.IsAdmin]
+    permission_classes = [helper.permission.IsAuthenticated]
     http_method_names = ["get"]
 
     def list(self, request):
