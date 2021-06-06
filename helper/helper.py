@@ -116,3 +116,14 @@ def modifyEmailAddress(email):
     else :
         return email
     
+
+
+
+# check for if record exists in database using id
+# id = record id, model=Record model, attribute = for message
+def checkRecord(id, model, attribute):
+    try:
+        record = model.objects.get(id=id)
+    except Exception:
+        raise exception.NotAcceptable(message.MODULE_NOT_FOUND(attribute))
+    return record

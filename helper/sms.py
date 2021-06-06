@@ -1,4 +1,5 @@
 from twilio.rest import Client
+import requests
 from django.conf import settings
 
 
@@ -22,6 +23,8 @@ def sendTGMessage(bot_message, bot_chatID=settings.TG_PURHCASE_ID):
         + "&parse_mode=Markdown&text="
         + bot_message.replace("#", "@")
     )
+
+    print(send_text)
 
     response = requests.get(send_text)
     return response.json()

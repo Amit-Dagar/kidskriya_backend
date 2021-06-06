@@ -65,21 +65,24 @@ class ReadProduct(ListAPIView):
                         name__icontains=request.GET["search"],
                         school=request.GET["school"],
                         cls=request.GET["class"],
+                        stock__gte=1,
                     )
                 else:
                     queryset = Products.objects.filter(
                         name__icontains=request.GET["search"],
                         school=request.GET["school"],
+                        stock__gte=1,
                     )
             else:
                 if "class" in request.GET:
                     queryset = Products.objects.filter(
                         name__icontains=request.GET["search"],
                         cls=request.GET["class"],
+                        stock__gte=1,
                     )
                 else:
                     queryset = Products.objects.filter(
-                        name__icontains=request.GET["search"]
+                        name__icontains=request.GET["search"], stock__gte=1
                     )
         else:
             if "school" in request.GET:
@@ -87,25 +90,23 @@ class ReadProduct(ListAPIView):
                     queryset = Products.objects.filter(
                         school=request.GET["school"],
                         cls=request.GET["class"],
+                        stock__gte=1,
                     )
                 else:
                     queryset = Products.objects.filter(
-                        school=request.GET["school"],
+                        school=request.GET["school"], stock__gte=1
                     )
             else:
                 if "class" in request.GET:
                     queryset = Products.objects.filter(
-                        cls=request.GET["class"],
+                        cls=request.GET["class"], stock__gte=1
                     )
                 else:
-                    queryset = Products.objects.filter()
+                    queryset = Products.objects.filter(stock__gte=1)
 
         page_context = paginator.paginate_queryset(queryset, request)
 
-        return helper.createResponse(
-            "",
-            ProductSerializer(queryset, many=True).data
-        )
+        return helper.createResponse("", ProductSerializer(queryset, many=True).data)
 
 
 # Update Product

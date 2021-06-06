@@ -1,16 +1,16 @@
-from django.db.models.query import QuerySet, RawQuerySet
+from random import lognormvariate
+from django.core import serializers
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     UpdateAPIView,
-    DestroyAPIView,
 )
 from helper import helper
-from rest_framework.pagination import PageNumberPagination
 from products.models import Products
 from schools.models import Schools, Classes
 from .models import Orders, OrderProducts
-from .serializers import OrderSerializer, OrderProductSerializer, ReadOrderSerializer
+from .serializers import ReadOrderSerializer, OrderProductSerializer
+import json
 
 
 # CHECKOUT API
@@ -81,8 +81,21 @@ class OrderPurchase(CreateAPIView):
         order.save()
 
         # preparing orders data
+        products = ""
         for product in request.data["products"]:
             product_check = Products.objects.get(id=product)
+
+            if product_check.stock == 1:
+                msg = (
+                    "Message: Product is out of stock \n\n product-name="
+                    + product_check.name
+                )
+                helper.sms.sendTGMessage(msg)
+
+            product_check.stock -= 1
+            product_check.save()
+
+            products = products + product_check.name + ", "
 
             orderProduct = OrderProducts.objects.create(
                 order=order,
@@ -94,6 +107,31 @@ class OrderPurchase(CreateAPIView):
             )
             orderProduct.save()
 
+        msgData = (
+            "message: **New Order Placed**\n\n"
+            + "orderId: "
+            + str(order.id)
+            + "\npayMethod: COD\nusername: "
+            + order.user.name
+            + "\nschool: "
+            + order.school.name
+            + "\nclass: "
+            + order.student_class.name
+            + "\nprice: "
+            + str(order.price)
+            + "\naddress: "
+            + order.address
+            + "\nadditionalDetails: "
+            + order.additional
+            + "\nstatus: Placed"
+            + "\ncreated: "
+            + str(order.created)
+            + "\nproducts: "
+            + products
+        )
+
+        helper.sms.sendTGMessage(msgData)
+
         return helper.createResponse(
             helper.message.MODULE_STATUS_CHANGE("Order", "placed"),
             {"order_id": order.id},
@@ -102,14 +140,9 @@ class OrderPurchase(CreateAPIView):
 
 # Read All Orders
 # GET
-# PARAMS -
 # /api/order/read
-# class ReadOrder(ListAPIView):
-#     # permission_classes = [helper.permission.IsAuthenticated]
-#     http_method_names = ["get"]
-
-
 class ReadOrders(ListAPIView):
+    permission_classes = [helper.permission.IsAdmin]
     http_method_names = ["get"]
 
     def list(self, request):
@@ -122,4 +155,69 @@ class ReadOrders(ListAPIView):
         return helper.createResponse(
             helper.message.MODULE_LIST("Order"),
             ReadOrderSerializer(queryset, many=True).data,
+        )
+
+
+# Update Order
+# GET
+# /api/order/update/<str:id>
+class UpdateOrder(UpdateAPIView):
+    permission_classes = [helper.permission.IsAdmin]
+
+    def update(self, request, id):
+        helper.check_parameters(request.data, ["status"])
+        order = helper.checkRecord(id, Orders, "Order")
+
+        order.status = int(request.data["status"])
+        order.save()
+
+        serialized_obj = serializers.serialize(
+            "json",
+            [
+                order,
+            ],
+        )
+        status = "Placed"
+        if order.status == 2:
+            status = "Out for delivery"
+        elif order.status == 3:
+            status = "Delivered"
+
+        productsData = OrderProductSerializer(
+            OrderProducts.objects.filter(order_id=order.id), many=True
+        ).data
+
+        products = ""
+        for pro in productsData:
+            products = products + pro["product_name"] + ", "
+
+        msgData = (
+            "message: **Order Updated**\n\n"
+            + "orderId: "
+            + str(order.id)
+            + "\npayMethod: COD\nusername: "
+            + order.user.name
+            + "\nschool: "
+            + order.school.name
+            + "\nclass: "
+            + order.student_class.name
+            + "\nprice: "
+            + str(order.price)
+            + "\naddress: "
+            + order.address
+            + "\nadditionalDetails: "
+            + order.additional
+            + "\nstatus: "
+            + status
+            + "\ncreated: "
+            + str(order.created)
+            + "\nproducts: "
+            + products
+        )
+
+        helper.sms.sendTGMessage(msgData)
+
+        return helper.createResponse(
+            helper.message.MODULE_STATUS_CHANGE("Order", "updated"),
+            {"order_id": order.id},
         )
