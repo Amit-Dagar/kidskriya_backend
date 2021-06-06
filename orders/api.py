@@ -107,6 +107,17 @@ class OrderPurchase(CreateAPIView):
             )
             orderProduct.save()
 
+        school = ""
+        className = ""
+
+        if order.school != None:
+            school = order.school.name
+        
+        if order.student_class != None:
+            className = order.student_class.name
+        
+
+
         msgData = (
             "message: **New Order Placed**\n\n"
             + "orderId: "
@@ -114,9 +125,9 @@ class OrderPurchase(CreateAPIView):
             + "\npayMethod: COD\nusername: "
             + order.user.name
             + "\nschool: "
-            + order.school.name
+            + school
             + "\nclass: "
-            + order.student_class.name
+            + className
             + "\nprice: "
             + str(order.price)
             + "\naddress: "
