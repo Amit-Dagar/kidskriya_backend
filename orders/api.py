@@ -112,11 +112,9 @@ class OrderPurchase(CreateAPIView):
 
         if order.school != None:
             school = order.school.name
-        
+
         if order.student_class != None:
             className = order.student_class.name
-        
-
 
         msgData = (
             "message: **New Order Placed**\n\n"
@@ -202,29 +200,36 @@ class UpdateOrder(UpdateAPIView):
         for pro in productsData:
             products = products + pro["product_name"] + ", "
 
-        msgData = (
-            "message: **Order Updated**\n\n"
-            + "orderId: "
-            + str(order.id)
-            + "\npayMethod: COD\nusername: "
-            + order.user.name
-            + "\nschool: "
-            + order.school.name
-            + "\nclass: "
-            + order.student_class.name
-            + "\nprice: "
-            + str(order.price)
-            + "\naddress: "
-            + order.address
-            + "\nadditionalDetails: "
-            + order.additional
-            + "\nstatus: "
-            + status
-            + "\ncreated: "
-            + str(order.created)
-            + "\nproducts: "
-            + products
-        )
+        try:
+            msgData = (
+                "message: **Order Updated**\n\n"
+                + "orderId: "
+                + str(order.id)
+                + "\npayMethod: COD\nusername: "
+                + order.user.name
+                + "\nschool: "
+                + order.school.name
+                + "\nclass: "
+                + order.student_class.name
+                + "\nprice: "
+                + str(order.price)
+                + "\naddress: "
+                + order.address
+                + "\nadditionalDetails: "
+                + order.additional
+                + "\nstatus: "
+                + status
+                + "\ncreated: "
+                + str(order.created)
+                + "\nproducts: "
+                + products
+            )
+            helper.sms.sendTGMessage(msgData)
+        except Exception:
+            return helper.createResponse(
+                helper.message.MODULE_STATUS_CHANGE("Order", "updated"),
+                {"order_id": order.id},
+            )
 
         helper.sms.sendTGMessage(msgData)
 
